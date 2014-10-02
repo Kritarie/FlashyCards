@@ -33,4 +33,8 @@ public class Home extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    public void Add(MenuItem item) {
+
+    }
 }
