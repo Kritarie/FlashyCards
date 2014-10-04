@@ -1,23 +1,29 @@
 package fc.flashycards;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Home extends Activity {
+
+    private ListView deckListView;
+    private ArrayAdapter<String> deckListAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+        deckListView = (ListView) findViewById(R.id.deck_list);
 
-        //TODO Populate ListView with decks
+        updateDeckList();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -28,29 +34,23 @@ public class Home extends Activity {
 
     //Add deck dialog
     public void Add(MenuItem item) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AddDeckDialog d = new AddDeckDialog();
+        d.show(getFragmentManager(), "Add Deck Dialog");
+    }
 
-        //Define custom layout for dialog view
-        LayoutInflater inflater = this.getLayoutInflater();
-        builder.setView(inflater.inflate(R.layout.dialog_new_deck, null));
+    //TODO Get list of files from internal storage and populate the listview
+    public void updateDeckList() {
+        //Get all the files in internal storage as list of names
+        File[] decks = getFilesDir().listFiles();
+        String[] deckNames = new String[decks.length];
+        for (int i = 0; i < decks.length; i++) {
+            deckNames[i] = decks[i].getName();
+        }
+        ArrayList<String> deckList = new ArrayList<String>();
+        deckList.addAll(Arrays.asList(deckNames));
 
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // User cancelled the dialog
-                dialog.dismiss();
-            }
-        });
-
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // User clicked OK button
-                //TODO Create new text file in external storage if edittext != empty && a file named edittext does not already exist
-            }
-        });
-
-        builder.setTitle(R.string.add_deck_title);
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
+        //Create adapter for deckList
+        deckListAdapter = new ArrayAdapter<String>(this, R.layout.deck_list_row, deckList);
+        deckListView.setAdapter(deckListAdapter);
     }
 }
