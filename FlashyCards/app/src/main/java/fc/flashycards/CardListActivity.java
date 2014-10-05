@@ -5,30 +5,20 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-/**
- * Created by Sean on 10/5/2014.
- *
- * This activity is created when a deck is selected by the user.
- */
-public class StudyActivity extends Activity {
+
+public class CardListActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_study);
-
-        //Get file name from parent activity
-        String fileName = getIntent().getExtras().getString("deckName");
-        setTitle(fileName);
-
-        //TODO Load all cards as Card objects contained in a deck object, display random card
+        setContentView(R.layout.activity_card_list);
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.study, menu);
+        getMenuInflater().inflate(R.menu.card_list, menu);
         return true;
     }
 

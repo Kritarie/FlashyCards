@@ -8,7 +8,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".Home"
+            android:name=".DeckListActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -19,10 +19,18 @@
         <activity
             android:name=".StudyActivity"
             android:label="@string/title_activity_study"
-            android:parentActivityName=".Home" >
+            android:parentActivityName=".DeckListActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="fc.flashycards.Home" />
+                android:value="fc.flashycards.DeckListActivity" />
+        </activity>
+        <activity
+            android:name=".CardListActivity"
+            android:label="@string/title_activity_card_list"
+            android:parentActivityName=".DeckListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="fc.flashycards.DeckListActivity" />
         </activity>
     </application>
 

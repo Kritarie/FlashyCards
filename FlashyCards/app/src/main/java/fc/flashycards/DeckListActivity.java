@@ -14,7 +14,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Home extends Activity {
+public class DeckListActivity extends Activity {
 
     private ListView deckListView;
     private ArrayAdapter<String> deckListAdapter;
@@ -22,7 +22,7 @@ public class Home extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.activity_deck_list);
         deckListView = (ListView) findViewById(R.id.deck_list);
 
         updateDeckList();
