@@ -1,9 +1,12 @@
 package fc.flashycards;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -23,6 +26,16 @@ public class Home extends Activity {
         deckListView = (ListView) findViewById(R.id.deck_list);
 
         updateDeckList();
+
+        //On listview item clicked, open study mode for selected deck
+        deckListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView parent, View v, int position, long id) {
+                //Start new study activity
+                Intent intent = new Intent(getBaseContext(), StudyActivity.class);
+                intent.putExtra("deckName", deckListView.getItemAtPosition(position).toString());
+                startActivity(intent);
+            }
+        });
     }
 
     @Override

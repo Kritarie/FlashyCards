@@ -3,13 +3,13 @@
 
     <string name="app_name">FlashyCards</string>
     <string name="action_settings">Settings</string>
-
     <string name="action_button_add">Add</string>
     <string name="add_deck_title">Add Deck</string>
     <string name="add_card_title">Add Card</string>
-
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="add_deck_hint">Deck Name</string>
+    <string name="title_activity_study">StudyActivity</string>
+    <string name="hello_world">Hello world!</string>
 
 </resources>
