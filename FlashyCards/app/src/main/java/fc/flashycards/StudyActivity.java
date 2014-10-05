@@ -10,6 +10,7 @@ import android.view.MenuItem;
  *
  * This activity is created when a deck is selected by the user.
  */
+
 public class StudyActivity extends Activity {
 
     @Override

@@ -9,10 +9,16 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+/**
+ * Created by Sean on 10/5/2014.
+ *
+ * This activity is created when the app is started. A list of
+ * available decks is populated from internal storage.
+ */
 
 public class DeckListActivity extends Activity {
 

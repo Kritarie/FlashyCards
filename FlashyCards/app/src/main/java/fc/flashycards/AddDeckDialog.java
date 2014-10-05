@@ -5,9 +5,11 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -22,6 +24,7 @@ import java.io.IOException;
  * This class defines the dialog presented to the user when a new deck
  * is to be created.
  */
+
 public class AddDeckDialog extends DialogFragment {
 
     @Override
@@ -34,7 +37,6 @@ public class AddDeckDialog extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View view = inflater.inflate(R.layout.dialog_new_deck, null);
         builder.setView(view);
-
 
         //Define action if CANCEL is pressed
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -81,7 +83,16 @@ public class AddDeckDialog extends DialogFragment {
         builder.setTitle(R.string.add_deck_title);
 
         return builder.create();
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        //If a hardware keyboard doesn't exist, open soft keyboard
+        if (getResources().getConfiguration().keyboard == Configuration.KEYBOARD_NOKEYS ) {
+            getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
+    }
 
     //Check if file exists in internal storage
     private boolean fileExists(String name) {

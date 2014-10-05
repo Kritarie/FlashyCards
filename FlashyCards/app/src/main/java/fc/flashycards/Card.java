@@ -7,6 +7,7 @@ package fc.flashycards;
  * about each individual card located within a deck, including
  * the front/back, and the weight
  */
+
 public class Card {
     private String front;
     private String back;
