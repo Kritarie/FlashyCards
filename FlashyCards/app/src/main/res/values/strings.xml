@@ -16,9 +16,17 @@
     <string name="add_card_front_hint">Front</string>
     <string name="add_card_back_hint">Back</string>
 
-    <!-- Dialog -->
+    <!-- Activities -->
     <string name="title_activity_study">Study Activity</string>
     <string name="title_activity_deck_list">Deck List Activity</string>
     <string name="title_activity_card_list">Card List Activity</string>
+    <string name="no_decks_text">You have not created any decks! Press the \'plus\' button in the top right to get started.</string>
+    <string name="no_cards_text">Press the \'plus\' button in the upper right to begin adding cards to this deck.</string>
+
+    <!-- Long Press Menu -->
+    <string-array name="deck_list_menu">
+        <item>Edit</item>
+        <item>Delete</item>
+    </string-array>
 
 </resources>

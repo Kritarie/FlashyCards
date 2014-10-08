@@ -11,8 +11,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 
 public class CardListActivity extends Activity {
@@ -30,7 +30,7 @@ public class CardListActivity extends Activity {
         fileName = getIntent().getExtras().getString("deckName");
         setTitle("Edit Deck: " + fileName);
 
-        updateCardList();
+        //updateCardList();
     }
 
 
@@ -58,8 +58,15 @@ public class CardListActivity extends Activity {
 
         try {
             BufferedReader in = new BufferedReader(new FileReader(deck));
+            String line;
+            String[] cardData;
+            while ((line = in.readLine()) != null) {
+                cardData = line.split("~");
+            }
         } catch (FileNotFoundException e) {
             //handle this error
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         //Create adapter for deckList

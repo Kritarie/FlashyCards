@@ -53,8 +53,17 @@ public class AddDeckDialog extends DialogFragment {
                 EditText deckName = (EditText) view.findViewById(R.id.new_deck_name);
                 String name = deckName.getText().toString();
 
+
                 //If no text entered, close
                 if (name.equals("")) {
+                    dialog.dismiss();
+                } else if (name.contains("/") || name.contains("\\")) {
+                    //File name is invalid, notify user
+                    Context context = getActivity().getApplicationContext();
+                    String errorText = "The deck name \"" + name + "\" is invalid";
+                    int time = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(context, errorText, time);
+                    toast.show();
                     dialog.dismiss();
                 } else if (fileExists(name)) {
                     //File exists, notify user
@@ -63,12 +72,12 @@ public class AddDeckDialog extends DialogFragment {
                     int time = Toast.LENGTH_SHORT;
                     Toast toast = Toast.makeText(context, errorText, time);
                     toast.show();
+                    dialog.dismiss();
                 } else {
-                    //File doesn't exist, ok to create
+                    //File doesn't exist and name is valid, ok to create
                     FileOutputStream fos;
                     try {
                         fos = getActivity().getApplicationContext().openFileOutput(name, Context.MODE_PRIVATE);
-                        fos.write(name.getBytes());
                         fos.close();
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
@@ -77,6 +86,7 @@ public class AddDeckDialog extends DialogFragment {
                     }
                     ((DeckListActivity) getActivity()).updateDeckList();
                     ((DeckListActivity) getActivity()).editDeck(name);
+                    dialog.dismiss();
                 }
             }
         });
