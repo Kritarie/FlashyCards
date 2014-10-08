@@ -76,6 +76,7 @@ public class AddDeckDialog extends DialogFragment {
                         e.printStackTrace();
                     }
                     ((DeckListActivity) getActivity()).updateDeckList();
+                    ((DeckListActivity) getActivity()).editDeck(name);
                 }
             }
         });

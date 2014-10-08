@@ -57,7 +57,6 @@ public class DeckListActivity extends Activity {
         d.show(getFragmentManager(), "Add Deck Dialog");
     }
 
-    //TODO Get list of files from internal storage and populate the listview
     public void updateDeckList() {
         //Get all the files in internal storage as list of names
         File[] decks = getFilesDir().listFiles();
@@ -71,5 +70,13 @@ public class DeckListActivity extends Activity {
         //Create adapter for deckList
         deckListAdapter = new ArrayAdapter<String>(this, R.layout.deck_list_row, deckList);
         deckListView.setAdapter(deckListAdapter);
+    }
+
+    //Starts CardListActivity to edit the specified deck
+    public void editDeck(String name) {
+        //Start new study activity
+        Intent intent = new Intent(getBaseContext(), CardListActivity.class);
+        intent.putExtra("deckName", name);
+        startActivity(intent);
     }
 }
