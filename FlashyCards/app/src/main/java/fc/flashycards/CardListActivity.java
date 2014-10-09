@@ -9,7 +9,6 @@ import android.widget.ListView;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,29 +24,24 @@ public class CardListActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_list);
+        cardListView = (ListView) findViewById(R.id.card_list);
 
         //Get file name from parent activity
         fileName = getIntent().getExtras().getString("deckName");
-        setTitle("Edit Deck: " + fileName);
-
-        //updateCardList();
+        setTitle(fileName);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateCardList();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.card_list, menu);
+        getMenuInflater().inflate(R.menu.card_list_menu, menu);
         return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
     //TODO Finish this method
@@ -56,21 +50,46 @@ public class CardListActivity extends Activity {
         File deck = new File(getFilesDir() + "/" + fileName);
         ArrayList<Card> cardList = new ArrayList<Card>();
 
+        //If deck is empty, notify user and return
+//        TextView tv = (TextView) findViewById(R.id.no_cards_text);
+//        if (deck.length() == 0) {
+//            tv.setVisibility(View.VISIBLE);
+//            return;
+//        } else {
+//            tv.setVisibility(View.GONE);
+//        }
+
         try {
             BufferedReader in = new BufferedReader(new FileReader(deck));
             String line;
             String[] cardData;
             while ((line = in.readLine()) != null) {
                 cardData = line.split("~");
+                cardList.add(new Card(cardData[0], cardData[1]));
             }
-        } catch (FileNotFoundException e) {
-            //handle this error
+            in.close();
         } catch (IOException e) {
+            //TODO handle this
             e.printStackTrace();
         }
 
+        for (Card c : cardList) {
+            System.out.println(c.getFront() + "~" + c.getBack());
+        }
         //Create adapter for deckList
-        cardListAdapter = new CardListAdapter<Card>(this, cardList);
+        cardListAdapter = new CardListAdapter(this, cardList);
         cardListView.setAdapter(cardListAdapter);
+    }
+
+    //Button for user to add card(s)
+    public void Add(MenuItem item) {
+        AddCardDialog d = new AddCardDialog();
+        d.setMenuItem(item);
+        d.show(getFragmentManager(), "Add Card Dialog");
+    }
+
+    //When a child fragment needs the filename
+    public String getFileName() {
+        return this.fileName;
     }
 }

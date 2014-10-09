@@ -53,7 +53,7 @@ public class DeckListActivity extends Activity {
     //Creates our header and "add" button
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.deck_list, menu);
+        getMenuInflater().inflate(R.menu.deck_list_menu, menu);
         return true;
     }
 

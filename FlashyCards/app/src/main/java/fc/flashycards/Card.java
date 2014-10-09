@@ -41,4 +41,6 @@ public class Card {
     public String getBack() {
         return this.back;
     }
+
+    public int getWeight() { return this.weight; }
 }

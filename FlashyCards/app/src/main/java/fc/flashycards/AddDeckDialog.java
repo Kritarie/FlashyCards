@@ -14,7 +14,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -79,9 +78,8 @@ public class AddDeckDialog extends DialogFragment {
                     try {
                         fos = getActivity().getApplicationContext().openFileOutput(name, Context.MODE_PRIVATE);
                         fos.close();
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
                     } catch (IOException e) {
+                        //TODO handle this
                         e.printStackTrace();
                     }
                     ((DeckListActivity) getActivity()).updateDeckList();
