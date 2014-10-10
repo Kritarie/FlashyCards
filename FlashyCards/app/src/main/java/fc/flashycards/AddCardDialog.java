@@ -3,20 +3,15 @@ package fc.flashycards;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
 
 /**
  * Created by Sean on 10/5/2014.
@@ -30,6 +25,7 @@ public class AddCardDialog extends DialogFragment {
     private String front;
     private String back;
     private MenuItem item;
+    private CardListActivity activity;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -42,7 +38,8 @@ public class AddCardDialog extends DialogFragment {
         final View view = inflater.inflate(R.layout.dialog_new_card, null);
         builder.setView(view);
 
-        deckName = ((CardListActivity) getActivity()).getFileName();
+        activity = (CardListActivity) getActivity();
+        deckName = activity.fileName;
 
         //Define action if CANCEL is pressed
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -51,6 +48,7 @@ public class AddCardDialog extends DialogFragment {
             }
         });
 
+        //TODO Redo add card for better performance (add to list, write to file on activity stop)
         //Define action is NEXT is pressed
         builder.setNeutralButton(R.string.neutral, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -58,34 +56,8 @@ public class AddCardDialog extends DialogFragment {
                 EditText backText = (EditText) view.findViewById(R.id.new_card_back);
                 front = frontText.getText().toString();
                 back = backText.getText().toString();
+                tryAddToDeck(front, back);
 
-                //If either field is empty, cancel
-                if (front.isEmpty() || back.isEmpty()) {
-                    dialog.dismiss();
-                } else if (cardExists()) {
-                    //Card exists, notify user
-                    Context context = getActivity().getApplicationContext();
-                    String errorText = "The entered card already exists in this deck";
-                    int time = Toast.LENGTH_SHORT;
-                    Toast toast = Toast.makeText(context, errorText, time);
-                    toast.show();
-                    dialog.dismiss();
-                } else {
-                    //Card is good, append to file
-                    FileOutputStream fos;
-                    try {
-                        fos = getActivity().getApplicationContext().
-                                openFileOutput(deckName, Context.MODE_APPEND);
-                        fos.write((front + "~" + back + "\n").getBytes());
-                        fos.close();
-                    } catch (IOException e) {
-                        //TODO Handle this
-                        e.printStackTrace();
-                    }
-                    //Because NEXT is pressed, open dialog again
-                    ((CardListActivity) getActivity()).updateCardList();
-                    dialog.dismiss();
-                }
                 ((CardListActivity) getActivity()).Add(item);
             }
         });
@@ -97,33 +69,7 @@ public class AddCardDialog extends DialogFragment {
                 EditText backText = (EditText) view.findViewById(R.id.new_card_back);
                 front = frontText.getText().toString();
                 back = backText.getText().toString();
-
-                //If either field is empty, cancel
-                if (front.isEmpty() || back.isEmpty()) {
-                    dialog.dismiss();
-                } else if (cardExists()) {
-                    //Card exists, notify user
-                    Context context = getActivity().getApplicationContext();
-                    String errorText = "The entered card already exists in this deck";
-                    int time = Toast.LENGTH_SHORT;
-                    Toast toast = Toast.makeText(context, errorText, time);
-                    toast.show();
-                    dialog.dismiss();
-                } else {
-                    //Card is good, append to file
-                    FileOutputStream fos;
-                    try {
-                        fos = getActivity().getApplicationContext().
-                                openFileOutput(deckName, Context.MODE_APPEND | Context.MODE_PRIVATE);
-                        fos.write((front + "~" + back + "\n").getBytes());
-                        fos.close();
-                    } catch (IOException e) {
-                        //TODO Handle this
-                        e.printStackTrace();
-                    }
-                    ((CardListActivity) getActivity()).updateCardList();
-                    dialog.dismiss();
-                }
+                tryAddToDeck(front, back);
             }
         });
 
@@ -132,21 +78,31 @@ public class AddCardDialog extends DialogFragment {
         return builder.create();
     }
 
-    private boolean cardExists() {
-        File file = new File(getActivity().getFilesDir() + "/" + deckName);
-        try {
-            BufferedReader in = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = in.readLine()) != null) {
-                if (line.equals(front + "~" + back)) {
-                    return true;
-                }
-            }
-        } catch (IOException e) {
-            //TODO handle this
-            e.printStackTrace();
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        //If a hardware keyboard doesn't exist, open soft keyboard
+        if (getResources().getConfiguration().keyboard == Configuration.KEYBOARD_NOKEYS ) {
+            getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
-        return false;
+    }
+
+    private void tryAddToDeck(String f, String b) {
+        if (!f.isEmpty() && !b.isEmpty()) {
+            Card card = new Card(front, back);
+            if (!activity.cards.contains(card)) {
+                //Good to create
+                activity.cards.add(card);
+                activity.cardListAdapter.notifyDataSetChanged();
+                activity.toggleEmptyText();
+            } else {
+                //Card exists, notify user
+                String errorText = "The card already exists";
+                int time = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(activity, errorText, time);
+                toast.show();
+            }
+        }
     }
 
     public void setMenuItem(MenuItem item) { this.item = item; }

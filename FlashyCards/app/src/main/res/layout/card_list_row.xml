@@ -3,8 +3,10 @@
     android:layout_height="?android:attr/listPreferredItemHeight"
     android:padding="6dip" >
 
-    <TextView
-        android:id="@+id/weight"
+    <!-- Delete button -->
+    <ImageButton
+        android:id="@+id/delete"
+        android:src="@drawable/ic_action_remove"
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:layout_alignParentBottom="true"
@@ -12,9 +14,9 @@
         android:layout_marginRight="6dip"
         android:layout_marginEnd="6dip"
         android:contentDescription="TODO"
-        android:text="5"
-        android:textSize="42sp"/>
+        android:background="@android:color/transparent" />
 
+    <!-- Card back -->
     <TextView
         android:id="@+id/back"
         android:layout_width="fill_parent"
@@ -22,26 +24,24 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_toRightOf="@id/weight"
-        android:layout_toEndOf="@id/weight"
-        android:ellipsize="marquee"
+        android:layout_toRightOf="@id/delete"
+        android:layout_toEndOf="@id/delete"
         android:singleLine="true"
-        android:text="Description"
-        android:textSize="16sp" />
+        android:textSize="20sp" />
 
+    <!-- Card front -->
     <TextView
         android:id="@+id/front"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="26dip"
         android:layout_above="@id/back"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        android:layout_alignWithParentIfMissing="true"
-        android:layout_toRightOf="@id/weight"
-        android:layout_toEndOf="@id/weight"
+        android:layout_toRightOf="@id/delete"
+        android:layout_toEndOf="@id/delete"
+        android:singleLine="true"
         android:gravity="center_vertical"
-        android:text="Example application"
-        android:textSize="16sp" />
+        android:textSize="20sp" />
 
 </RelativeLayout>

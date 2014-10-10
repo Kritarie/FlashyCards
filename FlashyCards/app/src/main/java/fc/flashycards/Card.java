@@ -43,4 +43,12 @@ public class Card {
     }
 
     public int getWeight() { return this.weight; }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Card)) return false;
+        if (obj == this) return true;
+        Card card = (Card) obj;
+        return this.front.equals(card.front) && this.back.equals(card.back);
+    }
 }

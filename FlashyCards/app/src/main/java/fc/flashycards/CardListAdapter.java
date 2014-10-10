@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -16,29 +17,50 @@ import java.util.ArrayList;
  * listviewitem objects for display in the CardListActivity
  */
 public class CardListAdapter extends ArrayAdapter<Card> {
+    private final CardListActivity activity;
     private final Context context;
     private final ArrayList<Card> cards;
+
+    static class ViewHolder {
+        public TextView front;
+        public TextView back;
+        public ImageButton delete;
+    }
 
     public CardListAdapter(Context context, ArrayList<Card> cards) {
         super(context, R.layout.card_list_row, cards);
         this.context = context;
         this.cards = cards;
+        this.activity = (CardListActivity) context;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        //Grab the row layout and its views
-        View rowView = inflater.inflate(R.layout.card_list_row, parent, false);
-        TextView frontView = (TextView) rowView.findViewById(R.id.front);
-        TextView backView = (TextView) rowView.findViewById(R.id.back);
-        TextView weightView = (TextView) rowView.findViewById(R.id.weight);
+    public View getView(final int position, View convertView, ViewGroup parent) {
+        View rowView = convertView;
+        if (rowView == null) {
+            LayoutInflater inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            rowView = inflater.inflate(R.layout.card_list_row, parent, false);
+            // configure view holder
+            ViewHolder viewHolder = new ViewHolder();
+            viewHolder.front = (TextView) rowView.findViewById(R.id.front);
+            viewHolder.back = (TextView) rowView.findViewById(R.id.back);
+            viewHolder.delete = (ImageButton) rowView.findViewById(R.id.delete);
+            rowView.setTag(viewHolder);
+        }
 
+        ViewHolder holder = (ViewHolder) rowView.getTag();
         //Set views according to Card object
-        frontView.setText(cards.get(position).getFront());
-        backView.setText(cards.get(position).getBack());
-        weightView.setText(String.valueOf(cards.get(position).getWeight()));
+        holder.front.setText(cards.get(position).getFront());
+        holder.back.setText(cards.get(position).getBack());
+        holder.delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cards.remove(position);
+                notifyDataSetChanged();
+                activity.toggleEmptyText();
+            }
+        });
 
         return rowView;
     }
