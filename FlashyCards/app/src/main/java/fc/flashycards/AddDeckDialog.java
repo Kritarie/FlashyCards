@@ -3,7 +3,6 @@ package fc.flashycards;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -11,11 +10,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import fc.flashycards.sql.DatabaseHandler;
+import fc.flashycards.sql.Deck;
 
 /**
  * Created by Sean on 10/4/2014.
@@ -25,6 +22,8 @@ import java.io.IOException;
  */
 
 public class AddDeckDialog extends DialogFragment {
+
+    private DeckListActivity activity;
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -36,6 +35,8 @@ public class AddDeckDialog extends DialogFragment {
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View view = inflater.inflate(R.layout.dialog_new_deck, null);
         builder.setView(view);
+
+        activity = (DeckListActivity) getActivity();
 
         //Define action if CANCEL is pressed
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -51,39 +52,18 @@ public class AddDeckDialog extends DialogFragment {
                 //Get user input
                 EditText deckName = (EditText) view.findViewById(R.id.new_deck_name);
                 String name = deckName.getText().toString();
+                deckName.getText().clear();
 
+                if (!name.equals("")) {
+                    DatabaseHandler db = new DatabaseHandler(getActivity().getApplicationContext());
+                    Deck d = new Deck(name, 0);
+                    db.addDeck(d);
+                    db.close();
+                    activity.decks.add(d);
 
-                //If no text entered, close
-                if (name.equals("")) {
-                    dialog.dismiss();
-                } else if (name.contains("/") || name.contains("\\")) {
-                    //File name is invalid, notify user
-                    Context context = getActivity().getApplicationContext();
-                    String errorText = "The deck name \"" + name + "\" is invalid";
-                    int time = Toast.LENGTH_SHORT;
-                    Toast toast = Toast.makeText(context, errorText, time);
-                    toast.show();
-                    dialog.dismiss();
-                } else if (fileExists(name)) {
-                    //File exists, notify user
-                    Context context = getActivity().getApplicationContext();
-                    String errorText = "The deck \"" + name + "\" already exists";
-                    int time = Toast.LENGTH_SHORT;
-                    Toast toast = Toast.makeText(context, errorText, time);
-                    toast.show();
-                    dialog.dismiss();
-                } else {
-                    //File doesn't exist and name is valid, ok to create
-                    FileOutputStream fos;
-                    try {
-                        fos = getActivity().getApplicationContext().openFileOutput(name, Context.MODE_PRIVATE);
-                        fos.close();
-                    } catch (IOException e) {
-                        //TODO handle this
-                        e.printStackTrace();
-                    }
-                    ((DeckListActivity) getActivity()).updateDeckList();
-                    ((DeckListActivity) getActivity()).editDeck(name);
+                    //Update deck list
+                    activity.deckListAdapter.notifyDataSetChanged();
+                    activity.toggleEmptyText();
                 }
             }
         });
@@ -100,11 +80,5 @@ public class AddDeckDialog extends DialogFragment {
         if (getResources().getConfiguration().keyboard == Configuration.KEYBOARD_NOKEYS ) {
             getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
         }
-    }
-
-    //Check if file exists in internal storage
-    private boolean fileExists(String name) {
-        File file = getActivity().getBaseContext().getFileStreamPath(name);
-        return file.exists();
     }
 }

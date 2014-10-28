@@ -1,22 +1,21 @@
 package fc.flashycards;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
+
+import fc.flashycards.sql.DatabaseHandler;
+import fc.flashycards.sql.Deck;
 
 /**
  * Created by Sean on 10/5/2014.
@@ -28,15 +27,15 @@ import java.util.Arrays;
 public class DeckListActivity extends Activity {
 
     private ListView deckListView;
-    private ArrayAdapter<String> deckListAdapter;
-    private String[] decks;
+    public DeckListAdapter deckListAdapter;
+    public List<Deck> decks;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deck_list);
         deckListView = (ListView) findViewById(R.id.deck_list);
-        updateDeckList();
+        populateDeckList();
         registerForContextMenu(deckListView);
 
         //On listview item clicked, open study mode for selected deck
@@ -44,7 +43,7 @@ public class DeckListActivity extends Activity {
             public void onItemClick(AdapterView parent, View v, int position, long id) {
                 //Start new study activity
                 Intent intent = new Intent(getBaseContext(), StudyActivity.class);
-                intent.putExtra("deckName", deckListView.getItemAtPosition(position).toString());
+                intent.putExtra("deck", (Deck) deckListView.getItemAtPosition(position));
                 startActivity(intent);
             }
         });
@@ -63,7 +62,7 @@ public class DeckListActivity extends Activity {
                                     ContextMenu.ContextMenuInfo menuInfo) {
         if (v.getId()==R.id.deck_list) {
             AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-            menu.setHeaderTitle(decks[info.position]);
+            menu.setHeaderTitle(decks.get(info.position).getName());
             String[] menuItems = getResources().getStringArray(R.array.deck_list_menu);
             for (int i = 0; i<menuItems.length; i++) {
                 menu.add(Menu.NONE, i, i, menuItems[i]);
@@ -75,17 +74,18 @@ public class DeckListActivity extends Activity {
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
         int menuItemIndex = item.getItemId();
-        String listItemName = decks[info.position];
+        Deck listItem = decks.get(info.position);
+        Log.d("Deck", "This deck is: " + listItem.getId());
         //Do things based on what action was selected
         switch (menuItemIndex) {
             //Edit
             case 0:
-                editDeck(listItemName);
+                editDeck(listItem);
                 break;
             //Delete
             case 1:
-                deleteDeck(listItemName);
-                updateDeckList();
+                deleteDeck(listItem);
+                toggleEmptyText();
                 break;
             default:
                 break;
@@ -94,61 +94,49 @@ public class DeckListActivity extends Activity {
         return true;
     }
 
-    //Whenever this activity resumes, we want to update the deck list
-    @Override
-    public void onResume() {
-        super.onResume();
-        updateDeckList();
-    }
-
-    //Add deck dialog
+    // Add deck dialog
     public void Add(MenuItem item) {
         AddDeckDialog d = new AddDeckDialog();
         d.show(getFragmentManager(), "Add Deck Dialog");
     }
 
-    public void updateDeckList() {
-        //Get all the files in internal storage as list of names
-        File[] deckFiles = getFilesDir().listFiles();
+    // Fill list from database
+    public void populateDeckList() {
+        DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+        decks = db.getAllDecks();
+        db.close();
 
-        //If there are no decks, notify user and return
-        TextView tv = (TextView) findViewById(R.id.no_decks_text);
-        if (deckFiles.length == 0) {
-            tv.setVisibility(View.VISIBLE);
-        } else {
-            tv.setVisibility(View.GONE);
-        }
-
-        decks = new String[deckFiles.length];
-        for (int i = 0; i < deckFiles.length; i++) {
-            decks[i] = deckFiles[i].getName();
-        }
-        ArrayList<String> deckList = new ArrayList<String>();
-        deckList.addAll(Arrays.asList(decks));
+        toggleEmptyText();
 
         //Create adapter for deckList
-        deckListAdapter = new ArrayAdapter<String>(this, R.layout.deck_list_row, deckList);
+        deckListAdapter = new DeckListAdapter(this, decks);
         deckListView.setAdapter(deckListAdapter);
     }
 
     //Starts CardListActivity to edit the specified deck
-    public void editDeck(String name) {
+    public void editDeck(Deck d) {
         Intent intent = new Intent(getBaseContext(), CardListActivity.class);
-        intent.putExtra("deckName", name);
+        intent.putExtra("deck", d);
         startActivity(intent);
     }
 
-    public void deleteDeck(String name) {
-        File file = new File(getFilesDir(), name);
-        Context context = getApplicationContext();
-        String notifyText;
-        int time = Toast.LENGTH_SHORT;
-        if (file.delete()) {
-            notifyText = "The deck \"" + name + "\" was deleted";
+    //Remove deck from list and database
+    public void deleteDeck(Deck d) {
+        DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+        db.deleteDeck(d);
+        db.close();
+        Log.d("Delete Deck", "Deleted deck: " + d.getName() + " " + d.getId());
+        decks.remove(d);
+        deckListAdapter.notifyDataSetChanged();
+    }
+
+    //If there are no decks, display textview
+    public void toggleEmptyText() {
+        TextView tv = (TextView) findViewById(R.id.no_decks_text);
+        if (decks.size() == 0) {
+            tv.setVisibility(View.VISIBLE);
         } else {
-            notifyText = "The deck \"" + name + "\" could not be deleted";
+            tv.setVisibility(View.GONE);
         }
-        Toast toast = Toast.makeText(context, notifyText, time);
-        toast.show();
     }
 }

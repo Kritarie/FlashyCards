@@ -8,7 +8,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import java.util.List;
+
+import fc.flashycards.sql.Card;
+import fc.flashycards.sql.DatabaseHandler;
 
 /**
  * Created by sean on 10/7/14.
@@ -19,7 +22,7 @@ import java.util.ArrayList;
 public class CardListAdapter extends ArrayAdapter<Card> {
     private final CardListActivity activity;
     private final Context context;
-    private final ArrayList<Card> cards;
+    private final List<Card> cards;
 
     static class ViewHolder {
         public TextView front;
@@ -27,7 +30,7 @@ public class CardListAdapter extends ArrayAdapter<Card> {
         public ImageButton delete;
     }
 
-    public CardListAdapter(Context context, ArrayList<Card> cards) {
+    public CardListAdapter(Context context, List<Card> cards) {
         super(context, R.layout.card_list_row, cards);
         this.context = context;
         this.cards = cards;
@@ -56,6 +59,9 @@ public class CardListAdapter extends ArrayAdapter<Card> {
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                DatabaseHandler db = new DatabaseHandler(activity.getApplicationContext());
+                db.deleteCard(cards.get(position));
+                db.close();
                 cards.remove(position);
                 notifyDataSetChanged();
                 activity.toggleEmptyText();

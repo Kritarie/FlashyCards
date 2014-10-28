@@ -1,9 +1,12 @@
 package fc.flashycards;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import fc.flashycards.sql.Deck;
 
 /**
  * Created by Sean on 10/5/2014.
@@ -13,16 +16,19 @@ import android.view.MenuItem;
 
 public class StudyActivity extends Activity {
 
+    private Deck deck;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study);
 
-        //Get file name from parent activity
-        String fileName = getIntent().getExtras().getString("deckName");
-        setTitle(fileName);
+        //Get deck from parent activity
+        Intent i = getIntent();
+        deck = i.getParcelableExtra("deck");
+        setTitle(deck.getName());
 
-        //TODO Load all cards as Card objects contained in a deck object, display random card
+        //TODO Load all cards in specified deck and select from them randomly
     }
 
 

@@ -11,7 +11,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
-import android.widget.Toast;
+
+import fc.flashycards.sql.Card;
+import fc.flashycards.sql.DatabaseHandler;
+import fc.flashycards.sql.Deck;
 
 /**
  * Created by Sean on 10/5/2014.
@@ -21,7 +24,7 @@ import android.widget.Toast;
  */
 public class AddCardDialog extends DialogFragment {
 
-    private String deckName;
+    private Deck deck;
     private String front;
     private String back;
     private MenuItem item;
@@ -39,7 +42,7 @@ public class AddCardDialog extends DialogFragment {
         builder.setView(view);
 
         activity = (CardListActivity) getActivity();
-        deckName = activity.fileName;
+        deck = activity.deck;
 
         //Define action if CANCEL is pressed
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -48,7 +51,6 @@ public class AddCardDialog extends DialogFragment {
             }
         });
 
-        //TODO Redo add card for better performance (add to list, write to file on activity stop)
         //Define action is NEXT is pressed
         builder.setNeutralButton(R.string.neutral, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
@@ -56,9 +58,20 @@ public class AddCardDialog extends DialogFragment {
                 EditText backText = (EditText) view.findViewById(R.id.new_card_back);
                 front = frontText.getText().toString();
                 back = backText.getText().toString();
-                tryAddToDeck(front, back);
+                frontText.getText().clear();
+                backText.getText().clear();
 
-                ((CardListActivity) getActivity()).Add(item);
+                if (!front.equals("") && !back.equals("")) {
+                    DatabaseHandler db = new DatabaseHandler(activity.getApplicationContext());
+                    Card c = new Card(deck.getId(), front, back, 0);
+                    db.addCard(c, deck);
+                    db.close();
+                    activity.cards.add(c);
+
+                    //Update list and add another card
+                    activity.cardListAdapter.notifyDataSetChanged();
+                    activity.Add(item);
+                }
             }
         });
 
@@ -69,7 +82,20 @@ public class AddCardDialog extends DialogFragment {
                 EditText backText = (EditText) view.findViewById(R.id.new_card_back);
                 front = frontText.getText().toString();
                 back = backText.getText().toString();
-                tryAddToDeck(front, back);
+                frontText.getText().clear();
+                backText.getText().clear();
+
+                if (!front.equals("") && !back.equals("")) {
+                    DatabaseHandler db = new DatabaseHandler(activity.getApplicationContext());
+                    Card c = new Card(deck.getId(), front, back, 0);
+                    db.addCard(c, deck);
+                    db.close();
+                    activity.cards.add(c);
+
+                    //Update list
+                    activity.cardListAdapter.notifyDataSetChanged();
+                    activity.toggleEmptyText();
+                }
             }
         });
 
@@ -84,24 +110,6 @@ public class AddCardDialog extends DialogFragment {
         //If a hardware keyboard doesn't exist, open soft keyboard
         if (getResources().getConfiguration().keyboard == Configuration.KEYBOARD_NOKEYS ) {
             getDialog().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-        }
-    }
-
-    private void tryAddToDeck(String f, String b) {
-        if (!f.isEmpty() && !b.isEmpty()) {
-            Card card = new Card(front, back);
-            if (!activity.cards.contains(card)) {
-                //Good to create
-                activity.cards.add(card);
-                activity.cardListAdapter.notifyDataSetChanged();
-                activity.toggleEmptyText();
-            } else {
-                //Card exists, notify user
-                String errorText = "The card already exists";
-                int time = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(activity, errorText, time);
-                toast.show();
-            }
         }
     }
 

@@ -2,84 +2,72 @@ package fc.flashycards;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
+
+import fc.flashycards.sql.Card;
+import fc.flashycards.sql.DatabaseHandler;
+import fc.flashycards.sql.Deck;
 
 
 public class CardListActivity extends Activity {
 
-    public ListView cardListView;
-    public ArrayAdapter<Card> cardListAdapter;
-    public ArrayList<Card> cards;
-    public String fileName;
+    private ListView cardListView;
+    public CardListAdapter cardListAdapter;
+    public List<Card> cards;
+    public Deck deck;
+
+    private DatabaseHandler db;
+
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_list);
+        context = getApplicationContext();
+
         cardListView = (ListView) findViewById(R.id.card_list);
-        cards = new ArrayList<Card>();
+
+        //Get deck from parent activity
+        Intent i = getIntent();
+        deck = i.getParcelableExtra("deck");
+        setTitle(deck.getName());
+
+        Log.d("Deck", "This deck is: " + deck.getId());
+
+
+        populateCardList();
+    }
+
+    private void populateCardList() {
+        db = new DatabaseHandler(context);
+        cards = db.getAllCards(deck.getId());
+        db.close();
+
+        toggleEmptyText();
 
         //Create adapter for deckList
         cardListAdapter = new CardListAdapter(this, cards);
         cardListView.setAdapter(cardListAdapter);
-
-        //Get file name from parent activity
-        fileName = getIntent().getExtras().getString("deckName");
-        setTitle(fileName);
     }
 
-    //Load deck from file
     @Override
-    protected void onResume() {
-        super.onResume();
-        File file = new File(getFilesDir() + "/" + fileName);
-        try {
-            BufferedReader in = new BufferedReader(new FileReader(file));
-            String line;
-            String[] cardData;
-            while ((line = in.readLine()) != null) {
-                cardData = line.split("~");
-                cards.add(new Card(cardData[0], cardData[1]));
-            }
-            in.close();
-        } catch (IOException e) {
-            //TODO Handle this correctly
-            e.printStackTrace();
-        }
-        toggleEmptyText();
-        cardListAdapter.notifyDataSetChanged();
-    }
-
-    //Save deck to file
-    @Override
-    protected void onStop() {
+    public void onStop() {
         super.onStop();
-        FileOutputStream fos;
-        try {
-            fos = openFileOutput(fileName, Context.MODE_PRIVATE);
-            for (Card c : cards) {
-                fos.write((c.getFront() + "~" + c.getBack() + "\n").getBytes());
-            }
-            fos.close();
-        } catch (IOException e) {
-            //TODO Handle this correctly
-            e.printStackTrace();
-        }
+        deck.setSize(cards.size());
+        DatabaseHandler db = new DatabaseHandler(context);
+        db.updateDeck(deck);
+        db.close();
     }
-
 
     //Inflate action bar layout
     @Override
