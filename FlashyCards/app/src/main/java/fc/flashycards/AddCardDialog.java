@@ -34,15 +34,15 @@ public class AddCardDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        activity = (CardListActivity) getActivity();
+        deck = activity.deck;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
         //Define custom layout for dialog view
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View view = inflater.inflate(R.layout.dialog_new_card, null);
         builder.setView(view);
-
-        activity = (CardListActivity) getActivity();
-        deck = activity.deck;
 
         //Define action if CANCEL is pressed
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {

@@ -12,10 +12,12 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import fc.flashycards.sql.DatabaseHandler;
 import fc.flashycards.sql.Deck;
+import fc.flashycards.study.StudyActivity;
 
 /**
  * Created by Sean on 10/5/2014.
@@ -30,13 +32,18 @@ public class DeckListActivity extends Activity {
     public DeckListAdapter deckListAdapter;
     public List<Deck> decks;
 
+    private DatabaseHandler db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deck_list);
         deckListView = (ListView) findViewById(R.id.deck_list);
-        populateDeckList();
-        registerForContextMenu(deckListView);
+        decks = new ArrayList<Deck>();
+        deckListAdapter = new DeckListAdapter(this, decks);
+        deckListView.setAdapter(deckListAdapter);
+
+        //populateDeckList();
 
         //On listview item clicked, open study mode for selected deck
         deckListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -47,6 +54,8 @@ public class DeckListActivity extends Activity {
                 startActivity(intent);
             }
         });
+
+        registerForContextMenu(deckListView);
     }
 
     //Creates our header and "add" button
@@ -100,15 +109,15 @@ public class DeckListActivity extends Activity {
         d.show(getFragmentManager(), "Add Deck Dialog");
     }
 
-    // Fill list from database
-    public void populateDeckList() {
-        DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+    @Override
+    public void onResume() {
+        super.onResume();
+        db = new DatabaseHandler(getApplicationContext());
         decks = db.getAllDecks();
         db.close();
 
         toggleEmptyText();
 
-        //Create adapter for deckList
         deckListAdapter = new DeckListAdapter(this, decks);
         deckListView.setAdapter(deckListAdapter);
     }
@@ -122,7 +131,7 @@ public class DeckListActivity extends Activity {
 
     //Remove deck from list and database
     public void deleteDeck(Deck d) {
-        DatabaseHandler db = new DatabaseHandler(getApplicationContext());
+        db = new DatabaseHandler(getApplicationContext());
         db.deleteDeck(d);
         db.close();
         Log.d("Delete Deck", "Deleted deck: " + d.getName() + " " + d.getId());

@@ -29,19 +29,19 @@ public class AddDeckDialog extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        activity = (DeckListActivity) getActivity();
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
 
         //Define custom layout for dialog view
         LayoutInflater inflater = getActivity().getLayoutInflater();
         final View view = inflater.inflate(R.layout.dialog_new_deck, null);
         builder.setView(view);
 
-        activity = (DeckListActivity) getActivity();
-
         //Define action if CANCEL is pressed
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                dialog.dismiss();
+                dialog.cancel();
             }
         });
 
@@ -59,11 +59,8 @@ public class AddDeckDialog extends DialogFragment {
                     Deck d = new Deck(name, 0);
                     db.addDeck(d);
                     db.close();
-                    activity.decks.add(d);
 
-                    //Update deck list
-                    activity.deckListAdapter.notifyDataSetChanged();
-                    activity.toggleEmptyText();
+                    activity.onResume();
                 }
             }
         });

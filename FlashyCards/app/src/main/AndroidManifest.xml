@@ -17,7 +17,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".StudyActivity"
+            android:name=".study.StudyActivity"
             android:label="@string/title_activity_study"
             android:parentActivityName=".DeckListActivity" >
             <meta-data

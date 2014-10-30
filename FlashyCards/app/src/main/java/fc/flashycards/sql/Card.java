@@ -63,12 +63,4 @@ public class Card {
     public int getWeight() {
         return this.weight;
     }
-
-    // methods
-
-    public boolean incWeight() {
-        if (weight >= MAX_WEIGHT) return false;
-        weight++;
-        return true;
-    }
 }
