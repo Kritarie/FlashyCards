@@ -3,13 +3,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="#DDC0DD"
     tools:context=".DeckListActivity">
 
     <ListView
         android:id="@+id/deck_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </ListView>
+        android:layout_height="wrap_content"
+        android:listSelector="@drawable/listitem_selector"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="3.0sp"/>
 
     <TextView
         android:id="@+id/no_decks_text"

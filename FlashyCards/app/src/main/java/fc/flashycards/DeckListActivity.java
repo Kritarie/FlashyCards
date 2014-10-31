@@ -3,6 +3,8 @@ package fc.flashycards;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -39,11 +41,12 @@ public class DeckListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deck_list);
         deckListView = (ListView) findViewById(R.id.deck_list);
-        decks = new ArrayList<Deck>();
+
+        db = new DatabaseHandler(getApplicationContext());
+        decks = db.getAllDecks();
+        db.close();
         deckListAdapter = new DeckListAdapter(this, decks);
         deckListView.setAdapter(deckListAdapter);
-
-        //populateDeckList();
 
         //On listview item clicked, open study mode for selected deck
         deckListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -54,8 +57,6 @@ public class DeckListActivity extends Activity {
                 startActivity(intent);
             }
         });
-
-        registerForContextMenu(deckListView);
     }
 
     //Creates our header and "add" button
@@ -65,77 +66,20 @@ public class DeckListActivity extends Activity {
         return true;
     }
 
-    //On long click, open menu of items defined in values.xml
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-                                    ContextMenu.ContextMenuInfo menuInfo) {
-        if (v.getId()==R.id.deck_list) {
-            AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)menuInfo;
-            menu.setHeaderTitle(decks.get(info.position).getName());
-            String[] menuItems = getResources().getStringArray(R.array.deck_list_menu);
-            for (int i = 0; i<menuItems.length; i++) {
-                menu.add(Menu.NONE, i, i, menuItems[i]);
-            }
-        }
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
-        int menuItemIndex = item.getItemId();
-        Deck listItem = decks.get(info.position);
-        Log.d("Deck", "This deck is: " + listItem.getId());
-        //Do things based on what action was selected
-        switch (menuItemIndex) {
-            //Edit
-            case 0:
-                editDeck(listItem);
-                break;
-            //Delete
-            case 1:
-                deleteDeck(listItem);
-                toggleEmptyText();
-                break;
-            default:
-                break;
-        }
-
-        return true;
-    }
-
     // Add deck dialog
     public void Add(MenuItem item) {
-        AddDeckDialog d = new AddDeckDialog();
+        AddDeckDialog d = new AddDeckDialog(new DialogDismissHandler());
         d.show(getFragmentManager(), "Add Deck Dialog");
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
+    // Delete deck dialog
+    public void Delete(Deck deck) {
+//        DeleteDeckDialog d = new DeleteDeckDialog(deck, new DialogDismissHandler());
+//        d.show(getFragmentManager(), "Delete Deck Dialog");
+        decks.remove(deck);
         db = new DatabaseHandler(getApplicationContext());
-        decks = db.getAllDecks();
+        db.deleteDeck(deck);
         db.close();
-
-        toggleEmptyText();
-
-        deckListAdapter = new DeckListAdapter(this, decks);
-        deckListView.setAdapter(deckListAdapter);
-    }
-
-    //Starts CardListActivity to edit the specified deck
-    public void editDeck(Deck d) {
-        Intent intent = new Intent(getBaseContext(), CardListActivity.class);
-        intent.putExtra("deck", d);
-        startActivity(intent);
-    }
-
-    //Remove deck from list and database
-    public void deleteDeck(Deck d) {
-        db = new DatabaseHandler(getApplicationContext());
-        db.deleteDeck(d);
-        db.close();
-        Log.d("Delete Deck", "Deleted deck: " + d.getName() + " " + d.getId());
-        decks.remove(d);
         deckListAdapter.notifyDataSetChanged();
     }
 
@@ -146,6 +90,30 @@ public class DeckListActivity extends Activity {
             tv.setVisibility(View.VISIBLE);
         } else {
             tv.setVisibility(View.GONE);
+        }
+    }
+
+    private class DialogDismissHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case 0: //Add deck
+                    if (msg.obj != null) {
+                        System.out.println("Message found");
+                        db = new DatabaseHandler(getApplicationContext());
+                        db.addDeck((Deck) msg.obj);
+                        decks = db.getAllDecks();
+                        db.close();
+                        toggleEmptyText();
+                        deckListAdapter.notifyDataSetChanged();
+                    }
+                    break;
+                case 1: //Delete deck
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

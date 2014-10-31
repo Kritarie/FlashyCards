@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import fc.flashycards.sql.Card;
@@ -44,20 +45,29 @@ public class CardListActivity extends Activity {
 
         Log.d("Deck", "This deck is: " + deck.getId());
 
+        db = new DatabaseHandler(context);
+        cards = db.getAllCards(deck.getId());
+        db.close();
 
-        populateCardList();
+        toggleEmptyText();
+        cardListAdapter = new CardListAdapter(this, cards);
+        cardListView.setAdapter(cardListAdapter);
     }
 
-    private void populateCardList() {
+    private void refreshCardList() {
         db = new DatabaseHandler(context);
         cards = db.getAllCards(deck.getId());
         db.close();
 
         toggleEmptyText();
 
-        //Create adapter for deckList
-        cardListAdapter = new CardListAdapter(this, cards);
-        cardListView.setAdapter(cardListAdapter);
+        cardListAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshCardList();
     }
 
     @Override

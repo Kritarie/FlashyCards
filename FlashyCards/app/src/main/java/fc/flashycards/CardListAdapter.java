@@ -48,7 +48,7 @@ public class CardListAdapter extends ArrayAdapter<Card> {
             ViewHolder viewHolder = new ViewHolder();
             viewHolder.front = (TextView) rowView.findViewById(R.id.front);
             viewHolder.back = (TextView) rowView.findViewById(R.id.back);
-            viewHolder.delete = (ImageButton) rowView.findViewById(R.id.delete);
+            viewHolder.delete = (ImageButton) rowView.findViewById(R.id.btn_card_delete);
             rowView.setTag(viewHolder);
         }
 
@@ -59,12 +59,11 @@ public class CardListAdapter extends ArrayAdapter<Card> {
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DatabaseHandler db = new DatabaseHandler(activity.getApplicationContext());
+                DatabaseHandler db = new DatabaseHandler(context);
                 db.deleteCard(cards.get(position));
                 db.close();
                 cards.remove(position);
-                notifyDataSetChanged();
-                activity.toggleEmptyText();
+                activity.onResume();
             }
         });
 

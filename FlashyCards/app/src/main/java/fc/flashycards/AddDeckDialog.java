@@ -6,6 +6,8 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -24,6 +26,16 @@ import fc.flashycards.sql.Deck;
 public class AddDeckDialog extends DialogFragment {
 
     private DeckListActivity activity;
+    Handler handler;
+    Deck deck;
+
+    public AddDeckDialog() {
+
+    }
+
+    public AddDeckDialog(Handler handler) {
+        this.handler = handler;
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -55,12 +67,11 @@ public class AddDeckDialog extends DialogFragment {
                 deckName.getText().clear();
 
                 if (!name.equals("")) {
-                    DatabaseHandler db = new DatabaseHandler(getActivity().getApplicationContext());
-                    Deck d = new Deck(name, 0);
-                    db.addDeck(d);
-                    db.close();
-
-                    activity.onResume();
+//                    DatabaseHandler db = new DatabaseHandler(getActivity().getApplicationContext());
+//                    Deck d = new Deck(name, 0);
+//                    db.addDeck(d);
+//                    db.close();
+                    deck = new Deck(name, 0);
                 }
             }
         });
@@ -68,6 +79,15 @@ public class AddDeckDialog extends DialogFragment {
         builder.setTitle(R.string.add_deck_title);
 
         return builder.create();
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+
+        Message msg = new Message();
+        msg.obj = deck;
+        handler.sendMessage(msg);
     }
 
     @Override

@@ -17,7 +17,8 @@
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
+        android:layout_alignParentBottom="true"
+        android:visibility="gone">
 
         <ImageButton
             android:id="@+id/btnPositive"
@@ -27,7 +28,7 @@
             android:layout_height="wrap_content"
             android:contentDescription="@string/btn_positive"
             android:src="@drawable/ic_action_accept"
-            android:background="#9900CC00"/>
+            android:background="#00CC00"/>
 
         <ImageButton
             android:id="@+id/btnNegative"
@@ -37,7 +38,7 @@
             android:layout_height="wrap_content"
             android:contentDescription="@string/btn_negative"
             android:src="@drawable/ic_action_cancel"
-            android:background="#99ff0000"/>
+            android:background="#ff0000"/>
 
     </LinearLayout>
 

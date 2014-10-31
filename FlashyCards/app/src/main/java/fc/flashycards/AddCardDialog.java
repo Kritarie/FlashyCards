@@ -66,11 +66,9 @@ public class AddCardDialog extends DialogFragment {
                     Card c = new Card(deck.getId(), front, back, 0);
                     db.addCard(c, deck);
                     db.close();
-                    activity.cards.add(c);
 
                     //Update list and add another card
-                    activity.cardListAdapter.notifyDataSetChanged();
-                    activity.Add(item);
+                    activity.onResume();
                 }
             }
         });
@@ -93,8 +91,7 @@ public class AddCardDialog extends DialogFragment {
                     activity.cards.add(c);
 
                     //Update list
-                    activity.cardListAdapter.notifyDataSetChanged();
-                    activity.toggleEmptyText();
+                    activity.onResume();
                 }
             }
         });
