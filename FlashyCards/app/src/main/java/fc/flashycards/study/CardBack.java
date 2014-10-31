@@ -12,6 +12,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import fc.flashycards.R;
+import fc.flashycards.sql.Card;
 
 /**
  * This fragment is page two of the ViewPager for the
@@ -35,11 +36,12 @@ public class CardBack extends Fragment {
     private Animation bottomDown;
 
     // newInstance constructor for creating fragment with arguments
-    public static CardBack newInstance(int page, String title) {
+    public static CardBack newInstance(int page, String title, Card card) {
         CardBack instance = new CardBack();
         Bundle args = new Bundle();
         args.putInt("someInt", page);
         args.putString("someTitle", title);
+        //TODO bundle parcelable card so cardpager can randomly select
         instance.setArguments(args);
         return instance;
     }
@@ -65,6 +67,11 @@ public class CardBack extends Fragment {
         pos.getBackground().setAlpha(150);
         neg.getBackground().setAlpha(150);
 
+        bottomUp = AnimationUtils.loadAnimation(context,
+                R.anim.bottom_up);
+        bottomDown = AnimationUtils.loadAnimation(context,
+                R.anim.bottom_down);
+
         //Set button listeners
         pos.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,6 +79,8 @@ public class CardBack extends Fragment {
                 //On positive click
                 pos.getBackground().setAlpha(200);
                 neg.getBackground().setAlpha(100);
+                hiddenLayout.startAnimation(bottomDown);
+                hiddenLayout.setVisibility(View.GONE);
             }
         });
 
@@ -81,13 +90,10 @@ public class CardBack extends Fragment {
                 //On negative click
                 neg.getBackground().setAlpha(200);
                 pos.getBackground().setAlpha(100);
+                hiddenLayout.startAnimation(bottomDown);
+                hiddenLayout.setVisibility(View.GONE);
             }
         });
-
-        bottomUp = AnimationUtils.loadAnimation(context,
-                R.anim.bottom_up);
-        bottomDown = AnimationUtils.loadAnimation(context,
-                R.anim.bottom_down);
 
         return view;
     }
@@ -97,12 +103,5 @@ public class CardBack extends Fragment {
         super.onResume();
         hiddenLayout.startAnimation(bottomUp);
         hiddenLayout.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        hiddenLayout.startAnimation(bottomDown);
-        hiddenLayout.setVisibility(View.GONE);
     }
 }

@@ -130,7 +130,7 @@ public class DeckListActivity extends Activity {
     }
 
     // Delete deck dialog
-    public void deleteDeck(final Deck deck) {
+    public void deleteDeck(final Deck d) {
         LayoutInflater inflater = LayoutInflater.from(this);
         final View dialogView = inflater.inflate(R.layout.dialog_delete_deck, null);
 
@@ -140,10 +140,10 @@ public class DeckListActivity extends Activity {
                 .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        decks.remove(deck);
+                        decks.remove(d);
                         toggleEmptyText();
                         db = new DatabaseHandler(getApplicationContext());
-                        db.deleteDeck(deck);
+                        db.deleteDeck(d);
                         db.close();
                         deckListAdapter.notifyDataSetChanged();
                     }
@@ -161,9 +161,9 @@ public class DeckListActivity extends Activity {
     }
 
     //Edit deck
-    public void editDeck(Deck deck) {
+    public void editDeck(Deck d) {
         Intent intent = new Intent(this, CardListActivity.class);
-        intent.putExtra("deck", deck);
+        intent.putExtra("deck", d);
         startActivity(intent);
     }
 

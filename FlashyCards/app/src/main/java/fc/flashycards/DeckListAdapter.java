@@ -23,7 +23,6 @@ public class DeckListAdapter extends ArrayAdapter<Deck> {
     private final DeckListActivity activity;
     private final Context context;
     private final List<Deck> decks;
-    private Deck deck;
 
     static class ViewHolder {
         public TextView name;
@@ -56,7 +55,7 @@ public class DeckListAdapter extends ArrayAdapter<Deck> {
             rowView.setTag(viewHolder);
         }
 
-        deck = decks.get(position);
+        final Deck deck = decks.get(position);
         ViewHolder holder = (ViewHolder) rowView.getTag();
         //Set views according to Card object
         holder.name.setText(deck.getName());
