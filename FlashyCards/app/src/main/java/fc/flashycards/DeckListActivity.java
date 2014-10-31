@@ -145,8 +145,6 @@ public class DeckListActivity extends Activity {
                         db = new DatabaseHandler(getApplicationContext());
                         db.deleteDeck(deck);
                         db.close();
-                        deckListAdapter.clear();
-                        deckListAdapter.addAll(decks);
                         deckListAdapter.notifyDataSetChanged();
                     }
                 })
