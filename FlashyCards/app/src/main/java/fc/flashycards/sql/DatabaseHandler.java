@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +18,8 @@ import java.util.List;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
 
-    // Logcat cat
-    private static final String LOG = "DBHelper";
-
     // Database Version
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4;
 
     // Database Name
     private static final String DATABASE_NAME = "deckManager";
@@ -119,8 +115,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Getting all decks
-    public List<Deck> getAllDecks() {
-        List<Deck> deckList = new ArrayList<Deck>();
+    public ArrayList<Deck> getAllDecks() {
+        ArrayList<Deck> deckList = new ArrayList<Deck>();
         // Select All Query
         String selectQuery = "SELECT  * FROM " + TABLE_DECKS;
 
@@ -144,8 +140,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Getting all cards in deck
-    public List<Card> getAllCards(int deckId) {
-        List<Card> cardList = new ArrayList<Card>();
+    public ArrayList<Card> getAllCards(int deckId) {
+        ArrayList<Card> cardList = new ArrayList<Card>();
         // Select All Query
         String selectQuery = "SELECT  * FROM " + TABLE_CARDS +
                             " WHERE " + KEY_DECK + "=" + deckId;

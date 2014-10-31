@@ -1,7 +1,6 @@
 package fc.flashycards;
 
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,7 +10,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import fc.flashycards.sql.DatabaseHandler;
 import fc.flashycards.sql.Deck;
 
 /**
@@ -68,16 +66,14 @@ public class DeckListAdapter extends ArrayAdapter<Deck> {
             @Override
             public void onClick(View v) {
                 //TODO open dialog to remove deck
-                activity.Delete(deck);
+                activity.deleteDeck(deck);
             }
         });
 
         holder.edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(context, CardListActivity.class);
-                intent.putExtra("deck", deck);
-                activity.startActivity(intent);
+                activity.editDeck(deck);
             }
         });
 

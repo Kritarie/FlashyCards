@@ -1,21 +1,22 @@
 package fc.flashycards;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
-import android.util.Log;
-import android.view.ContextMenu;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import fc.flashycards.sql.DatabaseHandler;
 import fc.flashycards.sql.Deck;
@@ -32,7 +33,7 @@ public class DeckListActivity extends Activity {
 
     private ListView deckListView;
     public DeckListAdapter deckListAdapter;
-    public List<Deck> decks;
+    public ArrayList<Deck> decks;
 
     private DatabaseHandler db;
 
@@ -42,9 +43,11 @@ public class DeckListActivity extends Activity {
         setContentView(R.layout.activity_deck_list);
         deckListView = (ListView) findViewById(R.id.deck_list);
 
+        //Get all decks from DB and populate list
         db = new DatabaseHandler(getApplicationContext());
         decks = db.getAllDecks();
         db.close();
+        toggleEmptyText();
         deckListAdapter = new DeckListAdapter(this, decks);
         deckListView.setAdapter(deckListAdapter);
 
@@ -59,6 +62,12 @@ public class DeckListActivity extends Activity {
         });
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        deckListAdapter.notifyDataSetChanged();
+    }
+
     //Creates our header and "add" button
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -66,21 +75,98 @@ public class DeckListActivity extends Activity {
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // action with ID action_refresh was selected
+            case R.id.action_add:
+                newDeck();
+                break;
+            default:
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     // Add deck dialog
-    public void Add(MenuItem item) {
-        AddDeckDialog d = new AddDeckDialog(new DialogDismissHandler());
-        d.show(getFragmentManager(), "Add Deck Dialog");
+    public void newDeck() {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        final View dialogView = inflater.inflate(R.layout.dialog_new_deck, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Create Deck")
+                .setView(dialogView)
+                .setPositiveButton("Create", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        EditText textBox = (EditText) dialogView.findViewById(R.id.new_deck_name);
+                        String name = textBox.getText().toString();
+                        if (!name.isEmpty()) {
+                            db = new DatabaseHandler(getApplicationContext());
+                            db.addDeck(new Deck(name, 0));
+                            decks = db.getAllDecks();
+                            db.close();
+                            deckListAdapter.clear();
+                            deckListAdapter.addAll(decks);
+                            deckListAdapter.notifyDataSetChanged();
+                            toggleEmptyText();
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+
+        AlertDialog add = builder.create();
+        if (getResources().getConfiguration().keyboard == Configuration.KEYBOARD_NOKEYS ) {
+            add.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+        }
+        add.show();
     }
 
     // Delete deck dialog
-    public void Delete(Deck deck) {
-//        DeleteDeckDialog d = new DeleteDeckDialog(deck, new DialogDismissHandler());
-//        d.show(getFragmentManager(), "Delete Deck Dialog");
-        decks.remove(deck);
-        db = new DatabaseHandler(getApplicationContext());
-        db.deleteDeck(deck);
-        db.close();
-        deckListAdapter.notifyDataSetChanged();
+    public void deleteDeck(final Deck deck) {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        final View dialogView = inflater.inflate(R.layout.dialog_delete_deck, null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Delete Deck")
+                .setView(dialogView)
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        decks.remove(deck);
+                        toggleEmptyText();
+                        db = new DatabaseHandler(getApplicationContext());
+                        db.deleteDeck(deck);
+                        db.close();
+                        deckListAdapter.clear();
+                        deckListAdapter.addAll(decks);
+                        deckListAdapter.notifyDataSetChanged();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+
+        AlertDialog add = builder.create();
+        add.show();
+    }
+
+    //Edit deck
+    public void editDeck(Deck deck) {
+        Intent intent = new Intent(this, CardListActivity.class);
+        intent.putExtra("deck", deck);
+        startActivity(intent);
     }
 
     //If there are no decks, display textview
@@ -90,30 +176,6 @@ public class DeckListActivity extends Activity {
             tv.setVisibility(View.VISIBLE);
         } else {
             tv.setVisibility(View.GONE);
-        }
-    }
-
-    private class DialogDismissHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            switch (msg.what) {
-                case 0: //Add deck
-                    if (msg.obj != null) {
-                        System.out.println("Message found");
-                        db = new DatabaseHandler(getApplicationContext());
-                        db.addDeck((Deck) msg.obj);
-                        decks = db.getAllDecks();
-                        db.close();
-                        toggleEmptyText();
-                        deckListAdapter.notifyDataSetChanged();
-                    }
-                    break;
-                case 1: //Delete deck
-                    break;
-                default:
-                    break;
-            }
         }
     }
 }

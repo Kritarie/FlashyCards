@@ -11,7 +11,6 @@ import android.widget.TextView;
 import java.util.List;
 
 import fc.flashycards.sql.Card;
-import fc.flashycards.sql.DatabaseHandler;
 
 /**
  * Created by sean on 10/7/14.
@@ -56,14 +55,11 @@ public class CardListAdapter extends ArrayAdapter<Card> {
         //Set views according to Card object
         holder.front.setText(cards.get(position).getFront());
         holder.back.setText(cards.get(position).getBack());
+
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DatabaseHandler db = new DatabaseHandler(context);
-                db.deleteCard(cards.get(position));
-                db.close();
-                cards.remove(position);
-                activity.onResume();
+                activity.deleteCard(cards.get(position));
             }
         });
 
