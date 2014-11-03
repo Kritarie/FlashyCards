@@ -51,15 +51,16 @@ public class CardListAdapter extends ArrayAdapter<Card> {
             rowView.setTag(viewHolder);
         }
 
+        final Card card = cards.get(position);
         ViewHolder holder = (ViewHolder) rowView.getTag();
         //Set views according to Card object
-        holder.front.setText(cards.get(position).getFront());
-        holder.back.setText(cards.get(position).getBack());
+        holder.front.setText(card.getFront());
+        holder.back.setText(card.getBack());
 
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                activity.deleteCard(cards.get(position));
+                activity.deleteCard(card);
             }
         });
 

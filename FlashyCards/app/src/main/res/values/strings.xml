@@ -13,8 +13,8 @@
     <string name="cancel">Cancel</string>
     <string name="neutral">Next</string>
     <string name="add_deck_hint">Deck Name</string>
-    <string name="add_card_front_hint">Front</string>
-    <string name="add_card_back_hint">Back</string>
+    <string name="add_card_front_hint">Question, vocab word, acronym</string>
+    <string name="add_card_back_hint">Answer or definition</string>
     <string name="dialog_delete_deck">Are you sure you want to delete this deck? All cards will be lost.</string>
 
     <!-- Activities -->

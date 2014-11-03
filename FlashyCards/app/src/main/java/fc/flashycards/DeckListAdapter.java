@@ -64,7 +64,6 @@ public class DeckListAdapter extends ArrayAdapter<Deck> {
         holder.delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO open dialog to remove deck
                 activity.deleteDeck(deck);
             }
         });

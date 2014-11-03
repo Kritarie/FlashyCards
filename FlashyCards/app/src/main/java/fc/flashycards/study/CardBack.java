@@ -36,7 +36,7 @@ public class CardBack extends Fragment {
     private Animation bottomDown;
 
     // newInstance constructor for creating fragment with arguments
-    public static CardBack newInstance(int page, String title, Card card) {
+    public static CardBack newInstance(int page, String title) {
         CardBack instance = new CardBack();
         Bundle args = new Bundle();
         args.putInt("someInt", page);

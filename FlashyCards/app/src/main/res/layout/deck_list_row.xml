@@ -32,7 +32,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/deck_name"
-        android:layout_toRightOf="@id/deck_size_label"
         android:layout_toEndOf="@id/deck_size_label"
         android:text="7"
         android:textStyle="italic"
@@ -44,11 +43,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/deck_name"
-        android:layout_toRightOf="@id/deck_size"
         android:layout_toEndOf="@id/deck_size"
-        android:layout_marginLeft="6dip"
         android:layout_marginStart="6dip"
-        android:text="Last Modified: "
+        android:text="Deck Proficiency: "
         android:textStyle="italic"
         android:textSize="16sp"/>
 
@@ -57,9 +54,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/deck_name"
-        android:layout_toRightOf="@id/deck_date_modified_label"
         android:layout_toEndOf="@id/deck_date_modified_label"
-        android:text="7/8/14"
+        android:text="84%"
         android:textStyle="italic"
         android:textSize="16sp"/>
 
@@ -69,8 +65,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true">
+        android:layout_alignParentEnd="true">
 
         <!-- Deck delete button -->
         <ImageButton

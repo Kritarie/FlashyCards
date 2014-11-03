@@ -159,8 +159,6 @@ public class CardListActivity extends Activity {
         db = new DatabaseHandler(getApplicationContext());
         db.deleteCard(card);
         db.close();
-        cardListAdapter.clear();
-        cardListAdapter.addAll(cards);
         cardListAdapter.notifyDataSetChanged();
     }
 
