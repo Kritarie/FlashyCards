@@ -1,5 +1,6 @@
 package fc.flashycards.study;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -7,9 +8,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import fc.flashycards.R;
 import fc.flashycards.sql.Card;
@@ -24,51 +22,44 @@ import fc.flashycards.sql.Deck;
 
 public class StudyActivity extends FragmentActivity {
 
-    private Deck deck;
-    private DatabaseHandler db;
-    private List<Card> cards;
-    public static ArrayList<Integer> randCardPicker;
+    public Deck deck;
+    private int deckId;
+    public Card currentCard;
 
     private FragmentManager fragmentManager;
     public CardPager adapterViewPager;
     public ViewPager vp;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study);
+        context = getApplicationContext();
         fragmentManager = getSupportFragmentManager();
 
         //Get deck from parent activity
         Intent i = getIntent();
-        deck = i.getParcelableExtra("deck");
-        setTitle(deck.getName());
+        deckId = i.getIntExtra("deck", 0);
 
-        //Get all cards in this deck
-        db = new DatabaseHandler(this);
-        cards = db.getAllCards(deck.getId());
+        DatabaseHandler db = new DatabaseHandler(this);
+        deck = db.getDeck(deckId);
         db.close();
 
-        //For each card, create new instance in randCardPicker
-        randCardPicker = new ArrayList<Integer>();
-        for (int x = 0; x < cards.size(); x++) {
-            Card c = cards.get(x);
-            int w = c.getWeight();
-            //Card weight is minimum, add only one instance
-            if (w == 0) {
-                randCardPicker.add(x);
-                continue;
-            }
-            //Add weight instances of this card
-            for (int j = 0; j < w; j++) {
-                randCardPicker.add(x);
-            }
-        }
+        setTitle(deck.getName());
 
         //initialize viewpager
         adapterViewPager = new CardPager(fragmentManager);
         vp = (ViewPager) findViewById(R.id.pager);
         vp.setAdapter(adapterViewPager);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        DatabaseHandler db = new DatabaseHandler(context);
+        db.updateDeck(deck);
+        db.close();
     }
 
     @Override

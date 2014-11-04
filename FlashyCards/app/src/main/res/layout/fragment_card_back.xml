@@ -5,10 +5,10 @@
     tools:context="fc.flashycards.study.CardBack">
 
     <TextView
+        android:id="@+id/study_card_back"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:text="Card Back Placeholder"
         android:textSize="44sp"/>
 
 

@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,8 +16,6 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-
-import java.util.ArrayList;
 
 import fc.flashycards.sql.DatabaseHandler;
 import fc.flashycards.sql.Deck;
@@ -31,32 +30,33 @@ import fc.flashycards.study.StudyActivity;
 
 public class DeckListActivity extends Activity {
 
-    private ListView deckListView;
-    public DeckListAdapter deckListAdapter;
-    public ArrayList<Deck> decks;
+    private DeckAdapter adapter;
 
     private DatabaseHandler db;
+    private TextView emptyText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deck_list);
-        deckListView = (ListView) findViewById(R.id.deck_list);
+        ListView deckListView = (ListView) findViewById(R.id.deck_list);
 
-        //Get all decks from DB and populate list
-        db = new DatabaseHandler(getApplicationContext());
-        decks = db.getAllDecks();
+        db = new DatabaseHandler(this);
+        Cursor cursor = db.getAllDecksCursor();
         db.close();
-        toggleEmptyText();
-        deckListAdapter = new DeckListAdapter(this, decks);
-        deckListView.setAdapter(deckListAdapter);
+
+        emptyText = (TextView) findViewById(R.id.no_decks_text);
+        adapter = new DeckAdapter(this, cursor, emptyText);
+        deckListView.setAdapter(adapter);
 
         //On listview item clicked, open study mode for selected deck
         deckListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView parent, View v, int position, long id) {
                 //Start new study activity
+                Cursor cursor = (Cursor) parent.getItemAtPosition(position);
+                int deckId = cursor.getInt(cursor.getColumnIndex(DatabaseHandler.KEY_ID));
                 Intent intent = new Intent(getBaseContext(), StudyActivity.class);
-                intent.putExtra("deck", (Deck) deckListView.getItemAtPosition(position));
+                intent.putExtra("deck", deckId);
                 startActivity(intent);
             }
         });
@@ -65,7 +65,12 @@ public class DeckListActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        deckListAdapter.notifyDataSetChanged();
+        db = new DatabaseHandler(this);
+        Cursor cursor = db.getAllDecksCursor();
+        db.close();
+        adapter.swapCursor(cursor);
+        toggleEmptyText();
+        System.out.println("Adapter refreshed");
     }
 
     //Creates our header and "add" button
@@ -89,7 +94,7 @@ public class DeckListActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    // Add deck dialog
+    //New deck dialog
     public void newDeck() {
         LayoutInflater inflater = LayoutInflater.from(this);
         final View dialogView = inflater.inflate(R.layout.dialog_new_deck, null);
@@ -105,11 +110,9 @@ public class DeckListActivity extends Activity {
                         if (!name.isEmpty()) {
                             db = new DatabaseHandler(getApplicationContext());
                             db.addDeck(new Deck(name, 0));
-                            decks = db.getAllDecks();
+                            Cursor cursor = db.getAllDecksCursor();
                             db.close();
-                            deckListAdapter.clear();
-                            deckListAdapter.addAll(decks);
-                            deckListAdapter.notifyDataSetChanged();
+                            adapter.swapCursor(cursor);
                             toggleEmptyText();
                         }
                     }
@@ -129,51 +132,12 @@ public class DeckListActivity extends Activity {
         add.show();
     }
 
-    // Delete deck dialog
-    public void deleteDeck(final Deck d) {
-        LayoutInflater inflater = LayoutInflater.from(this);
-        final View dialogView = inflater.inflate(R.layout.dialog_delete_deck, null);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Delete Deck")
-                .setView(dialogView)
-                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        decks.remove(d);
-                        toggleEmptyText();
-                        db = new DatabaseHandler(getApplicationContext());
-                        db.deleteDeck(d);
-                        db.close();
-                        deckListAdapter.notifyDataSetChanged();
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-
-
-        AlertDialog add = builder.create();
-        add.show();
-    }
-
-    //Edit deck
-    public void editDeck(Deck d) {
-        Intent intent = new Intent(this, CardListActivity.class);
-        intent.putExtra("deck", d);
-        startActivity(intent);
-    }
-
-    //If there are no decks, display textview
     public void toggleEmptyText() {
-        TextView tv = (TextView) findViewById(R.id.no_decks_text);
-        if (decks.size() == 0) {
-            tv.setVisibility(View.VISIBLE);
+        if (adapter.isEmpty()) {
+            emptyText.setVisibility(View.VISIBLE);
         } else {
-            tv.setVisibility(View.GONE);
+            emptyText.setVisibility(View.GONE);
         }
     }
+
 }

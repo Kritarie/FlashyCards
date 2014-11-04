@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.os.Build;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -17,8 +17,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 import fc.flashycards.sql.Card;
 import fc.flashycards.sql.DatabaseHandler;
 import fc.flashycards.sql.Deck;
@@ -27,44 +25,44 @@ import fc.flashycards.sql.Deck;
 public class CardListActivity extends Activity {
 
     private ListView cardListView;
-    public CardListAdapter cardListAdapter;
-    public ArrayList<Card> cards;
-    public Deck deck;
+    private CardAdapter adapter;
+    private Deck deck;
+    private int deckId;
 
     private DatabaseHandler db;
 
     private Context context;
+    private TextView emptyText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_card_list);
+        cardListView = (ListView) findViewById(R.id.card_list);
         context = getApplicationContext();
 
         //Get deck from parent activity
         Intent i = getIntent();
-        deck = i.getParcelableExtra("deck");
+        deckId = i.getIntExtra("deck", 0);
+
+        //Get all cards as cursor and get deck as deck object
+        db = new DatabaseHandler(this);
+        Cursor cursor = db.getAllCardsCursor(deckId);
+        deck = db.getDeck(deckId);
+        db.close();
+
         setTitle(deck.getName());
 
-        //Get cards from deck and display in list view
-        cardListView = (ListView) findViewById(R.id.card_list);
-        db = new DatabaseHandler(context);
-        cards = db.getAllCards(deck.getId());
-        db.close();
+        emptyText = (TextView) findViewById(R.id.no_cards_text);
+        adapter = new CardAdapter(this, cursor, emptyText, deckId);
+        cardListView.setAdapter(adapter);
         toggleEmptyText();
-        cardListAdapter = new CardListAdapter(this, cards);
-        cardListView.setAdapter(cardListAdapter);
-
-        //Enable action bar home button
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            getActionBar().setHomeButtonEnabled(true);
-        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        deck.setSize(cards.size());
+        deck.setSize(adapter.getCount());
         DatabaseHandler db = new DatabaseHandler(context);
         db.updateDeck(deck);
         db.close();
@@ -97,7 +95,7 @@ public class CardListActivity extends Activity {
         final View dialogView = inflater.inflate(R.layout.dialog_new_card, null);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Create Deck")
+        builder.setTitle("Create Card")
                 .setView(dialogView)
                 .setPositiveButton("Create", new DialogInterface.OnClickListener() {
                     @Override
@@ -107,13 +105,11 @@ public class CardListActivity extends Activity {
                         String front = frontBox.getText().toString();
                         String back = backBox.getText().toString();
                         if (!front.isEmpty() && !back.isEmpty()) {
-                            db = new DatabaseHandler(getApplicationContext());
+                            db = new DatabaseHandler(context);
                             db.addCard(new Card(deck.getId(), front, back, 0), deck);
-                            cards = db.getAllCards(deck.getId());
+                            Cursor c = db.getAllCardsCursor(deckId);
                             db.close();
-                            cardListAdapter.clear();
-                            cardListAdapter.addAll(cards);
-                            cardListAdapter.notifyDataSetChanged();
+                            adapter.swapCursor(c);
                             toggleEmptyText();
                         }
                     }
@@ -126,13 +122,11 @@ public class CardListActivity extends Activity {
                         String front = frontBox.getText().toString();
                         String back = backBox.getText().toString();
                         if (!front.isEmpty() && !back.isEmpty()) {
-                            db = new DatabaseHandler(getApplicationContext());
+                            db = new DatabaseHandler(context);
                             db.addCard(new Card(deck.getId(), front, back, 0), deck);
-                            cards = db.getAllCards(deck.getId());
+                            Cursor c = db.getAllCardsCursor(deckId);
                             db.close();
-                            cardListAdapter.clear();
-                            cardListAdapter.addAll(cards);
-                            cardListAdapter.notifyDataSetChanged();
+                            adapter.swapCursor(c);
                             toggleEmptyText();
                             newCard();
                         }
@@ -153,22 +147,12 @@ public class CardListActivity extends Activity {
         add.show();
     }
 
-    public void deleteCard(Card card) {
-        cards.remove(card);
-        toggleEmptyText();
-        db = new DatabaseHandler(getApplicationContext());
-        db.deleteCard(card);
-        db.close();
-        cardListAdapter.notifyDataSetChanged();
-    }
-
     //If deck is empty, display text instead
     public void toggleEmptyText() {
-        TextView tv = (TextView) findViewById(R.id.no_cards_text);
-        if (cards.size() == 0) {
-            tv.setVisibility(View.VISIBLE);
+        if (adapter.isEmpty()) {
+            emptyText.setVisibility(View.VISIBLE);
         } else {
-            tv.setVisibility(View.GONE);
+            emptyText.setVisibility(View.GONE);
         }
     }
 }

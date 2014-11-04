@@ -19,7 +19,7 @@ import java.util.List;
 public class DatabaseHandler extends SQLiteOpenHelper {
 
     // Database Version
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 6;
 
     // Database Name
     private static final String DATABASE_NAME = "deckManager";
@@ -29,17 +29,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String TABLE_CARDS = "cards";
 
     // Shared Table Column names
-    private static final String KEY_ID = "id";
+    public static final String KEY_ID = "_id";
 
     // Decks Table Column names
-    private static final String KEY_NAME = "name";
-    private static final String KEY_SIZE = "size";
+    public static final String KEY_NAME = "name";
+    public static final String KEY_SIZE = "size";
 
     // Cards Table Column names
-    private static final String KEY_DECK = "deckId";
-    private static final String KEY_FRONT = "front";
-    private static final String KEY_BACK = "back";
-    private static final String KEY_WEIGHT = "weight";
+    public static final String KEY_DECK = "deckId";
+    public static final String KEY_FRONT = "front";
+    public static final String KEY_BACK = "back";
+    public static final String KEY_WEIGHT = "weight";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -139,6 +139,24 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return deckList;
     }
 
+    // Getting all decks
+    public Cursor getAllDecksCursor() {
+        ArrayList<Deck> deckList = new ArrayList<Deck>();
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_DECKS;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
+
+        // return contact list
+        return cursor;
+    }
+
     // Getting all cards in deck
     public ArrayList<Card> getAllCards(int deckId) {
         ArrayList<Card> cardList = new ArrayList<Card>();
@@ -165,6 +183,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         // return card list
         return cardList;
+    }
+
+    public Cursor getAllCardsCursor(int deckId) {
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_CARDS +
+                " WHERE " + KEY_DECK + "=" + deckId;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor != null) {
+            cursor.moveToFirst();
+        }
+
+        // return contact list
+        return cursor;
     }
 
     // Getting decks count
@@ -207,22 +242,22 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     // Deleting single deck
-    public void deleteDeck(Deck deck) {
+    public void deleteDeck(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        List<Card> cards = getAllCards(deck.getId());
+        List<Card> cards = getAllCards(id);
         //Delete all cards under this deck
         for (Card card : cards) {
-            deleteCard(card);
+            deleteCard(card.getId());
         }
         //Now delete the deck
         db.delete(TABLE_DECKS, KEY_ID + " = ?",
-                new String[] { String.valueOf(deck.getId()) });
+                new String[] { String.valueOf(id) });
         db.close();
     }
 
-    public void deleteCard(Card card) {
+    public void deleteCard(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
         db.delete(TABLE_CARDS, KEY_ID + " = ?",
-                new String[] { String.valueOf(card.getId())});
+                new String[] { String.valueOf(id)});
     }
 }

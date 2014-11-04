@@ -12,37 +12,29 @@
         android:layout_height="fill_parent"
         android:layout_alignParentBottom="true"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="6dip"
         android:layout_marginEnd="6dip"
         android:contentDescription="TODO"
         android:background="@android:color/transparent" />
 
     <!-- Card back -->
     <TextView
-        android:id="@+id/back"
+        android:id="@+id/cardback"
         android:layout_width="fill_parent"
         android:layout_height="26dip"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:layout_toRightOf="@id/btn_card_delete"
         android:layout_toEndOf="@id/btn_card_delete"
-        android:singleLine="true"
         android:textSize="20sp" />
 
     <!-- Card front -->
     <TextView
-        android:id="@+id/front"
+        android:id="@+id/cardfront"
         android:layout_width="fill_parent"
         android:layout_height="26dip"
-        android:layout_above="@id/back"
-        android:layout_alignParentRight="true"
+        android:layout_above="@id/cardback"
         android:layout_alignParentEnd="true"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@id/btn_card_delete"
         android:layout_toEndOf="@id/btn_card_delete"
-        android:singleLine="true"
-        android:gravity="center_vertical"
         android:textSize="20sp" />
 
 </RelativeLayout>
