@@ -28,6 +28,18 @@ public class Card {
         this.weight = weight;
     }
 
+    public void incrementWeight() {
+        if (weight < MAX_WEIGHT) {
+            weight++;
+        }
+    }
+
+    public void decrementWeight() {
+        if (weight > 0) {
+            weight--;
+        }
+    }
+
     // setters
     public void setId(int id) {
         this.id = id;

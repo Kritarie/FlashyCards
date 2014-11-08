@@ -1,13 +1,75 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+
+<ViewFlipper xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/card_flipper"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="fc.flashycards.study.StudyActivity">
+    android:background="#DDC0DD"
+    android:onClick="flipCard">
 
-    <android.support.v4.view.ViewPager
-        android:id="@+id/pager"
+    <!-- Card Front layout -->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-    </android.support.v4.view.ViewPager>
+        android:layout_height="match_parent"
+        android:layout_margin="20dip"
+        android:background="@drawable/card_background">
 
-</RelativeLayout>
+        <TextView
+            android:id="@+id/card_front_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dip"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="Placeholder1"
+            android:textSize="36sp"/>
+
+    </RelativeLayout>
+
+    <!-- Card Back layout -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_margin="20dip"
+        android:background="@drawable/card_background">
+
+        <TextView
+            android:id="@+id/card_back_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dip"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="Placeholder2"
+            android:textSize="36sp"/>
+
+        <ImageButton
+            android:id="@+id/btnPositive"
+            android:src="@drawable/ic_action_accept"
+            android:background="@drawable/round_button_accept"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="20dip"
+            android:layout_marginBottom="20dip"
+            android:contentDescription="TODO"
+            android:onClick="answerCorrect"/>
+
+        <ImageButton
+            android:id="@+id/btnNegative"
+            android:src="@drawable/ic_action_cancel"
+            android:background="@drawable/round_button_cancel"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="20dip"
+            android:layout_marginBottom="20dip"
+            android:contentDescription="TODO"
+            android:onClick="answerWrong"/>
+
+    </RelativeLayout>
+
+</ViewFlipper>

@@ -1,13 +1,14 @@
 package fc.flashycards.study;
 
-import android.content.Context;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.view.ViewPager;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.View;
+import android.view.animation.AnimationUtils;
+import android.widget.TextView;
+import android.widget.ViewFlipper;
+
+import java.util.ArrayList;
 
 import fc.flashycards.R;
 import fc.flashycards.sql.Card;
@@ -15,66 +16,87 @@ import fc.flashycards.sql.DatabaseHandler;
 import fc.flashycards.sql.Deck;
 
 /**
- * Created by Sean on 10/5/2014.
+ * Created by Sean on 11/7/2014.
  *
- * This activity is created when a deck is selected by the user.
+ * Study activity which uses viewflipper instead of pager.
  */
+public class StudyActivity extends Activity {
 
-public class StudyActivity extends FragmentActivity {
-
-    public Deck deck;
     private int deckId;
-    public Card currentCard;
+    private Deck deck;
+    private ArrayList<Card> cards;
+    private CardSelector selector;
+    private Card currentCard;
 
-    private FragmentManager fragmentManager;
-    public CardPager adapterViewPager;
-    public ViewPager vp;
-    private Context context;
+    private ViewFlipper flipper;
+    private TextView front;
+    private TextView back;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_study);
-        context = getApplicationContext();
-        fragmentManager = getSupportFragmentManager();
+
+        //Initialize UI elements
+        flipper = (ViewFlipper) findViewById(R.id.card_flipper);
+        flipper.setInAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
+        flipper.setOutAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_out));
+        front = (TextView) findViewById(R.id.card_front_text);
+        back = (TextView) findViewById(R.id.card_back_text);
 
         //Get deck from parent activity
         Intent i = getIntent();
         deckId = i.getIntExtra("deck", 0);
 
+        //Get deck and card info from sql
         DatabaseHandler db = new DatabaseHandler(this);
         deck = db.getDeck(deckId);
+        cards = db.getAllCards(deckId);
         db.close();
 
         setTitle(deck.getName());
 
-        //initialize viewpager
-        adapterViewPager = new CardPager(fragmentManager);
-        vp = (ViewPager) findViewById(R.id.pager);
-        vp.setAdapter(adapterViewPager);
+        //Initialize card selector
+        selector = new CardSelector(cards);
+
+        //Select first card
+        currentCard = selector.generate();
+        front.setText(currentCard.getFront());
+    }
+
+    //Called on screen press
+    public void flipCard(View view) {
+        if (flipper.getDisplayedChild() == 0) {
+            back.setText(currentCard.getBack());
+            flipper.showNext();
+        }
+    }
+
+    //Called on green button press
+    public void answerCorrect(View view) {
+        currentCard.decrementWeight();
+        currentCard = selector.generate();
+        front.setText(currentCard.getFront());
+        flipper.showNext();
+    }
+
+    //Called on red button press
+    public void answerWrong(View view) {
+        currentCard.incrementWeight();
+        currentCard = selector.generate();
+        front.setText(currentCard.getFront());
+        flipper.showNext();
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        DatabaseHandler db = new DatabaseHandler(context);
+        DatabaseHandler db = new DatabaseHandler(this);
+        //Update the weight of each card in sql
+        for (Card c : cards) {
+            db.updateCard(c);
+        }
         db.updateDeck(deck);
         db.close();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.study_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 }
